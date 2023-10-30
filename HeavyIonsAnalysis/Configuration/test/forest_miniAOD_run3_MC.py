@@ -18,13 +18,13 @@ process.HiForestInfo.info = cms.vstring("HiForest, miniAOD, 132X, mc")
 process.source = cms.Source("PoolSource",
     duplicateCheckMode = cms.untracked.string("noDuplicateCheck"),
     fileNames = cms.untracked.vstring(
-        'root://eoscms.cern.ch//store/group/phys_heavyions/jviinika/PythiaHydjetRun3_5p36TeV_dijet_ptHat15_100kEvents_miniAOD_2023_08_30/PythiaHydjetDijetRun3/PythiaHydjetRun3_dijet_ptHat15_5p36TeV_miniAOD/230830_165931/0000/pythiaHydjet_miniAOD_11.root'
+        '/store/user/sarteaga/MinBias_PbPb_5p36TeV_Hydjet_v1/MinBias_PbPb_5p36TeV_Hydjet_MINIAOD_v5/231024_131749/0000/miniaod_1.root'
     ),
 )
 
 # number of events to process, set to -1 to process all events
 process.maxEvents = cms.untracked.PSet(
-    input = cms.untracked.int32(20)
+    input = cms.untracked.int32(-1)
     )
 
 ###############################################################################
@@ -53,7 +53,7 @@ process.GlobalTag.toGet.extend([
 
 # root output
 process.TFileService = cms.Service("TFileService",
-    fileName = cms.string("HiForestMiniAOD.root"))
+    fileName = cms.string("Forest_Run3_HYD_GT132X_mcRun3_2023_realistic_HI_v5_withPFCand_27102023.root"))
 
 # # edm output for debugging purposes
 # process.output = cms.OutputModule(
@@ -75,11 +75,16 @@ process.load('HeavyIonsAnalysis.EventAnalysis.HiGenAnalyzer_cfi')
 
 # event analysis
 process.load('HeavyIonsAnalysis.EventAnalysis.hltanalysis_cfi')
-process.load('HeavyIonsAnalysis.EventAnalysis.particleFlowAnalyser_cfi')
 process.load('HeavyIonsAnalysis.EventAnalysis.hievtanalyzer_mc_cfi')
 process.load('HeavyIonsAnalysis.EventAnalysis.skimanalysis_cfi')
 process.load('HeavyIonsAnalysis.EventAnalysis.hltobject_cfi')
 process.load('HeavyIonsAnalysis.EventAnalysis.l1object_cfi')
+
+process.load('HeavyIonsAnalysis.EventAnalysis.particleFlowAnalyser_cfi')
+#To check PF suggested by Andre!                                                                                                   
+process.particleFlowAnalyser.ptMin = cms.double(0.)
+process.particleFlowAnalyser.absEtaMax = cms.double(10.)
+
 
 #from HeavyIonsAnalysis.EventAnalysis.hltobject_cfi import trigger_list_mc
 #process.hltobject.triggerNames = trigger_list_mc
@@ -123,10 +128,10 @@ process.forest = cms.Path(
 #    process.hltobject +
 #    process.l1object +
     process.trackSequencePbPb +
-#    process.particleFlowAnalyser +
+    process.particleFlowAnalyser +
     process.hiEvtAnalyzer +
-    process.HiGenParticleAna +
-    process.ggHiNtuplizer +
+    #process.HiGenParticleAna +
+    #process.ggHiNtuplizer +
 #    process.zdcdigi +
 #    process.QWzdcreco +
     process.zdcanalyzer #+
@@ -144,6 +149,13 @@ matchJets = True             # Enables q/g and heavy flavor jet identification i
 addCandidateTagging = False
 doHIJetID = True             # Fill jet ID and composition information branches
 doWTARecluster = False        # Add jet phi and eta for WTA axis
+
+
+process.options.numberOfThreads = 4
+#process.options.numberOfStreams = 0
+process.options.numberOfConcurrentLuminosityBlocks = 1
+#process.options.eventSetup.numberOfConcurrentIOVs = 1
+
 
 if addR3Jets or addR3FlowJets or addR4Jets or addR4FlowJets :
     process.load("HeavyIonsAnalysis.JetAnalysis.extraJets_cff")
@@ -219,6 +231,7 @@ if addCandidateTagging:
     process.forest.insert(1,process.candidateBtagging*process.updatedPatJets)
 
 
+    
 #########################
 # Event Selection -> add the needed filters here
 #########################
@@ -226,6 +239,33 @@ if addCandidateTagging:
 process.load('HeavyIonsAnalysis.EventAnalysis.collisionEventSelection_cff')
 process.pclusterCompatibilityFilter = cms.Path(process.clusterCompatibilityFilter)
 process.pprimaryVertexFilter = cms.Path(process.primaryVertexFilter)
-process.load('HeavyIonsAnalysis.EventAnalysis.hffilter_cfi')
+
+process.load('HeavyIonsAnalysis.EventAnalysis.hffilter_PFCand_cfi')
+#process.load('HeavyIonsAnalysis.EventAnalysis.hffilter_HFTower_cfi')
+process.pphfCoincFilter1Th2 = cms.Path(process.phfCoincFilter1Th2)
+process.pphfCoincFilter2Th2 = cms.Path(process.phfCoincFilter2Th2)
+process.pphfCoincFilter3Th2 = cms.Path(process.phfCoincFilter3Th2)
+process.pphfCoincFilter4Th2 = cms.Path(process.phfCoincFilter4Th2)
+
+process.pphfCoincFilter1Th3 = cms.Path(process.phfCoincFilter1Th3)
+process.pphfCoincFilter2Th3 = cms.Path(process.phfCoincFilter2Th3)
+process.pphfCoincFilter3Th3 = cms.Path(process.phfCoincFilter3Th3)
+process.pphfCoincFilter4Th3 = cms.Path(process.phfCoincFilter4Th3)
+#process.pphfCoincFilter5Th3 = cms.Path(process.phfCoincFilter5Th3)                                                                                           
+process.pphfCoincFilter1Th4 = cms.Path(process.phfCoincFilter1Th4)
 process.pphfCoincFilter2Th4 = cms.Path(process.phfCoincFilter2Th4)
+process.pphfCoincFilter3Th4 = cms.Path(process.phfCoincFilter3Th4)
+process.pphfCoincFilter4Th4 = cms.Path(process.phfCoincFilter4Th4)
+#process.pphfCoincFilter5Th4 = cms.Path(process.phfCoincFilter5Th4)                                                                                           
+process.pphfCoincFilter1Th5 = cms.Path(process.phfCoincFilter1Th5)
+process.pphfCoincFilter2Th5 = cms.Path(process.phfCoincFilter2Th5)
+process.pphfCoincFilter3Th5 = cms.Path(process.phfCoincFilter3Th5)
+process.pphfCoincFilter4Th5 = cms.Path(process.phfCoincFilter4Th5)
+#process.pphfCoincFilter5Th5 = cms.Path(process.phfCoincFilter5Th5)                                                                                           
+process.pphfCoincFilter1Th6 = cms.Path(process.phfCoincFilter1Th6)
+process.pphfCoincFilter2Th6 = cms.Path(process.phfCoincFilter2Th6)
+process.pphfCoincFilter3Th6 = cms.Path(process.phfCoincFilter3Th6)
+process.pphfCoincFilter4Th6 = cms.Path(process.phfCoincFilter4Th6)
+#process.pphfCoincFilter5Th6 = cms.Path(process.phfCoincFilter5Th6)
+
 process.pAna = cms.EndPath(process.skimanalysis)
